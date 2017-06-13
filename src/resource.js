@@ -1,12 +1,27 @@
-var superagent = require('superagent')
-var Constants = require('./constants')
-var CACHE_KEY = 'alias'
+import superagent from 'superagent'
+import Constants from './constants'
 
-module.exports = function (options) {
-  var cache = {}
+const cache = {}
+const CACHE_KEY = 'alias'
 
+function packError (err, res) {
+  if (res && res.body && res.body.error) {
+    // use the server generated text instead of the superagent's default text
+    err = res.body.error
+
+    if (!err.message && res.text) {
+      err.message = res.text
+    }
+  }
+
+  return err
+}
+
+const Resource = function (options) {
   function applyDefaultValue (videomail, name) {
-    if (options.defaults[name] && !videomail[name]) { videomail[name] = options.defaults[name] }
+    if (options.defaults[name] && !videomail[name]) {
+      videomail[name] = options.defaults[name]
+    }
 
     return videomail
   }
@@ -22,19 +37,6 @@ module.exports = function (options) {
     return videomail
   }
 
-  function packError (err, res) {
-    if (res && res.body && res.body.error) {
-      // use the server generated text instead of the superagent's default text
-      err = res.body.error
-
-      if (!err.message && res.text) {
-        err.message = res.text
-      }
-    }
-
-    return err
-  }
-
   function fetch (alias, cb) {
     superagent
       .get('/videomail/' + alias + '/snapshot')
@@ -44,10 +46,14 @@ module.exports = function (options) {
       .end(function (err, res) {
         err = packError(err, res)
 
-        if (err) { cb(err) } else {
-          var videomail = res.body
+        if (err) {
+          cb(err)
+        } else {
+          const videomail = res.body
 
-          if (options.cache) { cache[CACHE_KEY] = videomail }
+          if (options.cache) {
+            cache[CACHE_KEY] = videomail
+          }
 
           cb(null, videomail)
         }
@@ -60,7 +66,7 @@ module.exports = function (options) {
       identifier = null
     }
 
-    var queryParams = {}
+    const queryParams = {}
 
     var url = options.baseUrl + '/videomail/'
     var request
@@ -94,18 +100,19 @@ module.exports = function (options) {
 
   this.get = function (alias, cb) {
     if (options.cache && cache[alias]) {
-      // keep all callbacks async
+      // keep callback async
       setTimeout(function () {
         cb(null, cache[alias])
       }, 0)
-    } else { fetch(alias, cb) }
+    } else {
+      fetch(alias, cb)
+    }
   }
 
   this.reportError = function (err, cb) {
-    var queryParams = {}
-
-    var url = options.baseUrl + '/client-error/'
-    var request = superagent('post', url)
+    const queryParams = {}
+    const url = options.baseUrl + '/client-error/'
+    const request = superagent('post', url)
 
     queryParams[Constants.SITE_NAME_LABEL] = options.siteName
 
@@ -157,7 +164,7 @@ module.exports = function (options) {
         formType = 'form'
         break
       default:
-        // keep all callbacks async
+        // keep callback async
         setTimeout(function () {
           cb(new Error('Invalid enctype given: ' + options.enctype))
         }, 0)
@@ -181,3 +188,5 @@ module.exports = function (options) {
     }
   }
 }
+
+export default Resource

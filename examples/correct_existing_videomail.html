@@ -6,16 +6,15 @@
 
         <style type='text/css'>
             input[type='email'], input[type='text'], textarea, .buttons {
-                margin:  1em 0;
+                margin: 1em 0;
                 display: block;
             }
-
 
             #videomail, #email { float: left; }
             #videomail { width: 400px; }
 
             #email {
-                width:       400px;
+                width: 400px;
                 margin-left: 1em;
             }
 
@@ -42,7 +41,6 @@
         <script>
             var VideomailClient = require('videomail-client')
             var videomailClient = new VideomailClient({
-              verbose: true,
               video: {
                 width: 400
               },

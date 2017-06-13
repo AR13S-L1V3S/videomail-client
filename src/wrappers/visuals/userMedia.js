@@ -1,20 +1,20 @@
-var h = require('hyperscript')
-var util = require('util')
+import h from 'hyperscript'
+import util from 'util'
 
-var AudioRecorder = require('./../../util/audioRecorder')
-var VideomailError = require('./../../util/videomailError')
-var EventEmitter = require('./../../util/eventEmitter')
-var MEDIA_EVENTS = require('./../../util/mediaEvents')
-var pretty = require('./../../util/pretty')
-var Events = require('./../../events')
+import AudioRecorder from './../../util/audioRecorder'
+import VideomailError from './../../util/videomailError'
+import EventEmitter from './../../util/eventEmitter'
+import MEDIA_EVENTS from './../../util/mediaEvents'
+import pretty from './../../util/pretty'
+import Events from './../../events'
 
-var EVENT_ASCII = '|—O—|'
+const EVENT_ASCII = '|—O—|'
 
-module.exports = function (recorder, options) {
+export default function (recorder, options) {
   EventEmitter.call(this, options, 'UserMedia')
 
-  var rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia()
-  var self = this
+  const rawVisualUserMedia = recorder && recorder.getRawVisualUserMedia()
+  const self = this
 
   var paused = false
   var record = false
@@ -28,13 +28,14 @@ module.exports = function (recorder, options) {
     if (typeof rawVisualUserMedia.srcObject !== 'undefined') {
       rawVisualUserMedia.srcObject = stream
     } else if (typeof rawVisualUserMedia.src !== 'undefined') {
-      var URL = window.URL || window.webkitURL
+      const URL = window.URL || window.webkitURL
       rawVisualUserMedia.src = URL.createObjectURL(stream) || stream
     } else {
       throw VideomailError.create(
         'Error attaching stream to element.',
         'Contact the developer about this',
-        options)
+        options
+      )
     }
   }
 
@@ -96,7 +97,7 @@ module.exports = function (recorder, options) {
   }
 
   function getFirstVideoTrack (localMediaStream) {
-    var videoTracks = getVideoTracks(localMediaStream)
+    const videoTracks = getVideoTracks(localMediaStream)
     var videoTrack
 
     if (videoTracks && videoTracks[0]) {
@@ -204,7 +205,7 @@ module.exports = function (recorder, options) {
     }
 
     function fireCallbacks () {
-      var readyState = rawVisualUserMedia.readyState
+      const readyState = rawVisualUserMedia.readyState
 
       // ready state, see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
       options.debug(
@@ -286,7 +287,7 @@ module.exports = function (recorder, options) {
     }
 
     try {
-      var videoTrack = getFirstVideoTrack(localMediaStream)
+      const videoTrack = getFirstVideoTrack(localMediaStream)
 
       if (!videoTrack) {
         options.debug('UserMedia: detected (but no video tracks exist')
@@ -316,7 +317,7 @@ module.exports = function (recorder, options) {
       }
 
       // very useful i think, so leave this and just use options.debug()
-      var heavyDebugging = true
+      const heavyDebugging = true
 
       if (heavyDebugging) {
         MEDIA_EVENTS.forEach(function (eventName) {
@@ -412,7 +413,7 @@ module.exports = function (recorder, options) {
 
   this.getRawWidth = function (responsive) {
     var rawWidth = this.getVideoWidth()
-    var widthDefined = options.hasDefinedWidth()
+    const widthDefined = options.hasDefinedWidth()
 
     if (widthDefined || options.hasDefinedHeight()) {
       if (!responsive && widthDefined) {

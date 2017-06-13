@@ -1,28 +1,22 @@
-var util = require('util')
-var h = require('hyperscript')
-var hidden = require('hidden')
+import util from 'util'
+import h from 'hyperscript'
+import hidden from 'hidden'
 
-var Events = require('./../../events')
-var Browser = require('./../../util/browser')
-var EventEmitter = require('./../../util/eventEmitter')
-var VideomailError = require('./../../util/videomailError')
+import Events from './../../events'
+import Browser from './../../util/browser'
+import EventEmitter from './../../util/eventEmitter'
+import VideomailError from './../../util/videomailError'
 
-var enableInlineVideo
-
-if (typeof navigator !== 'undefined') {
-  enableInlineVideo = require('iphone-inline-video')
-}
+import enableInlineVideo from 'iphone-inline-video'
 
 var Replay = function (parentElement, options) {
   EventEmitter.call(this, options, 'Replay')
 
-  var self = this
-  var browser = new Browser(options)
-  var debug = options.debug
+  const self = this
+  const browser = new Browser(options)
+  const debug = options.debug
 
-  var built,
-    replayElement,
-    videomail
+  var built, replayElement, videomail
 
   function buildElement () {
     debug('Replay: buildElement()')
@@ -97,7 +91,7 @@ var Replay = function (parentElement, options) {
 
     copyAttributes(videomail)
 
-    var hasAudio = videomail.recordingStats && videomail.recordingStats.sampleRate > 0
+    const hasAudio = videomail.recordingStats && videomail.recordingStats.sampleRate > 0
 
     this.show(videomail.width, videomail.height, hasAudio)
   }
@@ -202,9 +196,9 @@ var Replay = function (parentElement, options) {
   }
 
   this.getVideoSource = function (type) {
-    var sources = replayElement.getElementsByTagName('source')
-    var l = sources.length
-    var videoType = 'video/' + type
+    const sources = replayElement.getElementsByTagName('source')
+    const l = sources.length
+    const videoType = 'video/' + type
 
     var source
 
@@ -315,4 +309,4 @@ var Replay = function (parentElement, options) {
 
 util.inherits(Replay, EventEmitter)
 
-module.exports = Replay
+export default Replay

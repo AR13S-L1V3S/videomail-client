@@ -1,13 +1,17 @@
-require('core-js/shim')
-require('classlist.js')
-require('element-closest') // needed for IE 11
+import 'core-js/shim'
+import 'classlist.js'
 
-module.exports = function (window, navigator) {
+// needed for IE 11
+import 'element-closest'
+
+// https://github.com/julienetie/request-frame
+import requestFrame from 'request-frame'
+
+export default function (window = {}, navigator = {}) {
   // https://github.com/julienetie/request-frame/issues/6
   window.screen = window.screen || {}
 
-  // https://github.com/julienetie/request-frame
-  require('request-frame')('native')
+  requestFrame('native')
 
   // avoids warning "navigator.mozGetUserMedia has been replaced by navigator.mediaDevices.getUserMedia",
   // see https://github.com/binarykitchen/videomail-client/issues/79
@@ -15,22 +19,22 @@ module.exports = function (window, navigator) {
     // do not shim
   } else {
     navigator.getUserMedia_ =
-            navigator.getUserMedia ||
-            navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia ||
-            navigator.msGetUserMedia
+      navigator.getUserMedia ||
+      navigator.webkitGetUserMedia ||
+      navigator.mozGetUserMedia ||
+      navigator.msGetUserMedia
   }
 
   window.AudioContext = window.AudioContext || window.webkitAudioContext
   window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL
 
-  var methods = [
+  const methods = [
     'debug', 'groupCollapsed', 'groupEnd', 'error',
     'exception', 'info', 'log', 'trace', 'warn'
   ]
 
-  var noop = function () {}
-  var console = (window.console = window.console || {})
+  const noop = function () {}
+  const console = (window.console = window.console || {})
 
   var method
   var length = methods.length

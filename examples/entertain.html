@@ -6,14 +6,14 @@
 
         <style type="text/css">
             .entertain {
-                background-repeat:   no-repeat;
+                background-repeat:  no-repeat;
                 background-position: center center;
-                background-size:     cover;
-                background-color:    transparent;
-                vertical-align:      top;
-                padding:             1em;
-                color:               #fff;
-                text-shadow:         -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;
+                background-size: cover;
+                background-color: transparent;
+                vertical-align: top;
+                padding: 1em;
+                color: #fff;
+                text-shadow: -1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;
             }
 
             .bg1 {
@@ -39,8 +39,8 @@
         <script src="/videomail-client.js"></script>
         <script>
             var VideomailClient = require('videomail-client')
-            var videomailClient = new VideomailClient({
-              verbose: true,
+
+            new VideomailClient({
               enablePause: false,
               disableSubmit: true,
               video: {
@@ -58,9 +58,7 @@
                 entertainLimit: 4,
                 entertainInterval: 2e3
               }
-            })
-
-            videomailClient.show()
+            }).show()
         </script>
     </body>
 </html>

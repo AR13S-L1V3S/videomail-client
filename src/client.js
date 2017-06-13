@@ -1,22 +1,22 @@
-var merge = require('merge-recursive')
-var readystate = require('readystate')
-var util = require('util')
+import merge from 'merge-recursive'
+import readystate from 'readystate'
+import util from 'util'
 
-var defaultOptions = require('./options')
-var Constants = require('./constants')
-var Events = require('./events')
-var CollectLogger = require('./util/collectLogger')
-var EventEmitter = require('./util/eventEmitter')
-var Container = require('./wrappers/container')
-var OptionsWrapper = require('./wrappers/optionsWrapper')
-var Replay = require('./wrappers/visuals/replay')
-var Browser = require('./util/browser')
-var Resource = require('./resource')
+import defaultOptions from './options'
+import Constants from './constants'
+import Events from './events'
+import CollectLogger from './util/collectLogger'
+import EventEmitter from './util/eventEmitter'
+import Container from './wrappers/container'
+import OptionsWrapper from './wrappers/optionsWrapper'
+import Replay from './wrappers/visuals/replay'
+import Browser from './util/browser'
+import Resource from './resource'
 
 var collectLogger, browser
 
 function adjustOptions (options) {
-  var localOptions = merge.recursive(defaultOptions, options || {})
+  const localOptions = merge.recursive(defaultOptions, options || {})
 
   collectLogger = collectLogger || new CollectLogger(localOptions)
 
@@ -36,10 +36,10 @@ function getBrowser (localOptions) {
   return browser
 }
 
-var VideomailClient = function (options) {
-  var localOptions = adjustOptions(options)
-  var container = new Container(localOptions)
-  var debug = localOptions.debug
+const VideomailClient = function (options) {
+  const localOptions = adjustOptions(options)
+  const container = new Container(localOptions)
+  const debug = localOptions.debug
 
   var replay
 
@@ -171,4 +171,4 @@ Object.keys(Constants.public).forEach(function (name) {
 // just another convenient thing
 VideomailClient.events = Events
 
-module.exports = VideomailClient
+export default VideomailClient

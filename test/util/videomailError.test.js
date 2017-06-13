@@ -1,5 +1,5 @@
-const test = require('tape')
-const VideomailError = require('./../../src/util/videomailError')
+import test from 'tape'
+import VideomailError from './../../src/util/videomailError'
 
 const fakeOptions = {
   debug: function () {}

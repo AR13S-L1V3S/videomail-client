@@ -6,7 +6,7 @@
 
         <style type="text/css">
             input[type="email"], input[type="text"], fieldset, textarea, .buttons, #startOver {
-                margin:  1em 0;
+                margin: 1em 0;
                 display: block;
             }
         </style>
@@ -51,7 +51,6 @@
         <script>
             var VideomailClient = require('videomail-client')
             var videomailClient = new VideomailClient({
-              verbose: true,
               video: {limitSeconds: 120, width: 320, countdown: false},
               selectors: {
                 submitButtonSelector: 'body input[value="Submit"]',

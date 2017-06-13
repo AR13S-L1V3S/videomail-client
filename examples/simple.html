@@ -10,8 +10,8 @@
         <script src="/videomail-client.js"></script>
         <script>
             var VideomailClient = require('videomail-client')
-            var videomailClient = new VideomailClient({
-              verbose: true,
+
+            new VideomailClient({
               disableSubmit: true,
               enablePause: true,
               enableAutoPause: true,
@@ -20,9 +20,7 @@
                 width: 280,
                 limitSeconds: 20
               }
-            })
-
-            videomailClient.show()
+            }).show()
         </script>
     </body>
 </html>

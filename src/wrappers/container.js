@@ -1,32 +1,33 @@
-var insertCss = require('insert-css')
-var merge = require('merge-recursive')
-var hidden = require('hidden')
-var util = require('util')
-var Visibility = require('document-visibility')
+import css from './../styles/css/main.min.css.js'
 
-var Dimension = require('./dimension')
-var Visuals = require('./visuals')
-var Buttons = require('./buttons')
-var Form = require('./form')
+import insertCss from 'insert-css'
+import merge from 'merge-recursive'
+import hidden from 'hidden'
+import util from 'util'
+import Visibility from 'document-visibility'
 
-var Resource = require('./../resource')
-var Events = require('./../events')
+import Dimension from './dimension'
+import Visuals from './visuals'
+import Buttons from './buttons'
+import Form from './form'
 
-var EventEmitter = require('./../util/eventEmitter')
-var VideomailError = require('./../util/videomailError')
-var css = require('./../styles/css/main.min.css.js')
+import Resource from './../resource'
+import Events from './../events'
+
+import EventEmitter from './../util/eventEmitter'
+import VideomailError from './../util/videomailError'
 
 var Container = function (options) {
   EventEmitter.call(this, options, 'Container')
 
-  var self = this
+  const self = this
 
-  var visibility = Visibility()
-  var visuals = new Visuals(this, options)
-  var buttons = new Buttons(this, options)
-  var resource = new Resource(options)
-  var htmlElement = document && document.querySelector && document.querySelector('html')
-  var debug = options.debug
+  const visibility = Visibility()
+  const visuals = new Visuals(this, options)
+  const buttons = new Buttons(this, options)
+  const resource = new Resource(options)
+  const htmlElement = document && document.querySelector && document.querySelector('html')
+  const debug = options.debug
 
   var hasError = false
   var submitted = false
@@ -62,7 +63,7 @@ var Container = function (options) {
   function buildForm () {
     debug('Container: buildForm()')
 
-    var formElement = getFormElement()
+    const formElement = getFormElement()
 
     if (formElement) {
       form = new Form(self, formElement, options)
@@ -134,7 +135,7 @@ var Container = function (options) {
         var tagName = e.target.tagName
 
         if (tagName !== 'INPUT' && tagName !== 'TEXTAREA') {
-          var code = e.keyCode ? e.keyCode : e.which
+          const code = e.keyCode ? e.keyCode : e.which
 
           if (code === 32) {
             e.preventDefault()
@@ -151,18 +152,17 @@ var Container = function (options) {
 
     // better to keep the one and only error listeners
     // at one spot, here, because unload() will do a removeAllListeners()
-    self
-      .on(Events.ERROR, function (err) {
-        processError(err)
-        unloadChildren(err)
+    self.on(Events.ERROR, function (err) {
+      processError(err)
+      unloadChildren(err)
 
-        if (err.removeDimensions && err.removeDimensions()) {
-          removeDimensions()
-        }
-      })
-      .on(Events.LOADED_META_DATA, function () {
-        correctDimensions()
-      })
+      if (err.removeDimensions && err.removeDimensions()) {
+        removeDimensions()
+      }
+    })
+    .on(Events.LOADED_META_DATA, function () {
+      correctDimensions()
+    })
   }
 
   function validateOptions () {
@@ -178,7 +178,7 @@ var Container = function (options) {
     // this will just set the width but not the height because
     // it can be a form with more inputs elements
   function correctDimensions () {
-    var width = visuals.getRecorderWidth(true)
+    const width = visuals.getRecorderWidth(true)
 
     if (width < 1) {
       throw VideomailError.create('Recorder width cannot be less than 1!', options)
@@ -207,7 +207,7 @@ var Container = function (options) {
   }
 
   function submitVideomail (formData, method, cb) {
-    var FORM_FIELDS = {
+    const FORM_FIELDS = {
       'subject': options.selectors.subjectInputName,
       'from': options.selectors.fromInputName,
       'to': options.selectors.toInputName,
@@ -215,7 +215,8 @@ var Container = function (options) {
       'key': options.selectors.keyInputName,
       'parentKey': options.selectors.parentKeyInputName
     }
-    var videomailFormData = {}
+
+    const videomailFormData = {}
 
     Object.keys(FORM_FIELDS).forEach(function (key) {
       if (formData.hasOwnProperty(FORM_FIELDS[key])) {
@@ -257,7 +258,7 @@ var Container = function (options) {
     } else {
       submitted = true
 
-            // merge two json response bodies to fake as if it were only one request
+      // merge two json response bodies to fake as if it were only one request
       if (formResponse && formResponse.body) {
         Object.keys(formResponse.body).forEach(function (key) {
           response[key] = formResponse.body[key]
@@ -335,6 +336,7 @@ var Container = function (options) {
 
   this.build = function () {
     debug('Container: build()')
+
     try {
       containerElement = document.getElementById(options.selectors.containerId)
 
@@ -476,7 +478,7 @@ var Container = function (options) {
     }
   }
 
-    // this code needs a good rewrite :(
+  // this code needs a good rewrite :(
   this.validate = function (force) {
     var runValidation = true
     var valid
@@ -497,7 +499,7 @@ var Container = function (options) {
     if (runValidation) {
       this.emit(Events.VALIDATING)
 
-      var visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled()
+      const visualsValid = visuals.validate() && buttons.isRecordAgainButtonEnabled()
       var whyInvalid
 
       if (form) {
@@ -509,7 +511,9 @@ var Container = function (options) {
               valid = false
             }
 
-            if (!valid) { whyInvalid = 'Video is not recorded' }
+            if (!valid) {
+              whyInvalid = 'Video is not recorded'
+            }
           }
         } else {
           var invalidInput = form.getInvalidElement()
@@ -520,7 +524,9 @@ var Container = function (options) {
             whyInvalid = 'Form input(s() are invalid'
           }
         }
-      } else { valid = visualsValid }
+      } else {
+        valid = visualsValid
+      }
 
       if (valid) {
         this.emit(Events.VALID)
@@ -563,7 +569,7 @@ var Container = function (options) {
     this.disableForm(true)
     this.emit(Events.SUBMITTING)
 
-    var post = isPost(method)
+    const post = isPost(method)
 
         // a closure so that we can access method
     var submitVideomailCallback = function (err1, videomail, videomailResponse) {
@@ -653,4 +659,4 @@ var Container = function (options) {
 
 util.inherits(Container, EventEmitter)
 
-module.exports = Container
+export default Container

@@ -1,12 +1,14 @@
 // https://github.com/tgriesser/create-error
-var createError = require('create-error')
-var util = require('util')
-var originalPretty = require('./pretty')
-var Resource = require('./../resource')
+import createError from 'create-error'
+import util from 'util'
+import caller from 'caller'
 
-var VIDEOMAIL_ERR_NAME = 'Videomail Error'
+import originalPretty from './pretty'
+import Resource from './../resource'
 
-var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
+const VIDEOMAIL_ERR_NAME = 'Videomail Error'
+
+const VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
   'explanation': undefined,
   'logLines': undefined,
   'useragent': undefined,
@@ -16,7 +18,7 @@ var VideomailError = createError(Error, VIDEOMAIL_ERR_NAME, {
 })
 
 // shim pretty to exclude stack always
-var pretty = function (anything) {
+const pretty = function (anything) {
   return originalPretty(anything, {excludes: ['stack']})
 }
 
@@ -46,16 +48,17 @@ VideomailError.create = function (err, explanation, options, parameters) {
   parameters = parameters || {}
 
   // be super robust
-  var debug = (options && options.debug) || console.log
+  const debug = (options && options.debug) || console.log
 
   debug('VideomailError: create()')
 
-  var classList = parameters.classList || []
+  const classList = parameters.classList || []
 
   // Require Browser here, not at the top of the file to avoid
   // recursion. Because the Browser class is requiring this file as well.
-  var Browser = require('./browser')
-  var browser = new Browser(options)
+  // todo fix this deadlock
+  const Browser = require('./browser').default
+  const browser = new Browser(options)
 
   var errType
   var message
@@ -263,33 +266,13 @@ VideomailError.create = function (err, explanation, options, parameters) {
     errCode += ', name=' + (err.name ? err.name : 'undefined')
   }
 
-  var caller
-
-  if (VideomailError.create.caller) {
-    caller = VideomailError.create.caller
-  }
-
-  if (!caller) {
-    // try again
-
-    /*eslint-disable */
-    if (arguments.callee.caller) {
-      caller = util.inspect(arguments.callee.caller, {showHidden: true, depth: 3})
-    } else if (arguments.callee) {
-      caller = util.inspect(arguments.callee, {showHidden: true, depth: 3})
-    } else {
-      caller = '(no arguments.callee exist)'
-    }
-    /*eslint-enable */
-  }
-
-  var videomailError = new VideomailError(message, {
+  const videomailError = new VideomailError(message, {
     explanation: explanation,
     logLines: logLines,
     client: browser.getUsefulData(),
     url: window.location.href,
     code: errCode,
-    caller: caller || '(unable to find caller)',
+    caller: caller(2), // depth = 2, https://github.com/totherik/caller#depth
     stack: stack // have to assign it manually again because it is kinda protected
   })
 
@@ -346,4 +329,4 @@ VideomailError.create = function (err, explanation, options, parameters) {
   return videomailError
 }
 
-module.exports = VideomailError
+export default VideomailError

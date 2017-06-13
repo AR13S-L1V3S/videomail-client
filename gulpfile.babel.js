@@ -1,18 +1,20 @@
-const path = require('path')
-const fs = require('fs')
-const gulp = require('gulp')
-const plugins = require('gulp-load-plugins')()
-const nib = require('nib')
-const browserify = require('browserify')
-const source = require('vinyl-source-stream')
-const buffer = require('vinyl-buffer')
-const Router = require('router')
-const bodyParser = require('body-parser')
-const send = require('connect-send-json')
-const del = require('del')
-const minimist = require('minimist')
-const sslRootCas = require('ssl-root-cas')
-const pump = require('pump')
+import path from 'path'
+import fs from 'fs'
+import gulp from 'gulp'
+import gulpLoadPlugins from 'gulp-load-plugins'
+import nib from 'nib'
+import browserify from 'browserify'
+import source from 'vinyl-source-stream'
+import buffer from 'vinyl-buffer'
+import Router from 'router'
+import bodyParser from 'body-parser'
+import send from 'connect-send-json'
+import rimraf from 'rimraf'
+import minimist from 'minimist'
+import sslRootCas from 'ssl-root-cas'
+import pump from 'pump'
+
+const plugins = gulpLoadPlugins()
 
 const defaultOptions = {
   minify: false,
@@ -25,13 +27,24 @@ const options = minimist(process.argv.slice(2), {default: defaultOptions})
 
 plugins.util.log('Options:', options)
 
-gulp.task('clean:js', function (cb) {
-  del(['dist/*.js']).then(function () {
-    cb()
-  })
+gulp.task('clean:js', (cb) => {
+  rimraf('dist/*.js', cb)
 })
 
-gulp.task('stylus', function () {
+gulp.task('todo', () => {
+  gulp.src(['src/**/*.{js, styl}', 'gulpfile.babel.js', 'examples/*.html'], {base: './'})
+    .pipe(plugins.todo({fileName: 'TODO.md'}))
+    .pipe(gulp.dest('./'))
+})
+
+gulp.task('standard', () => {
+  // todo consider using snazzy https://github.com/feross/snazzy
+  return gulp.src(['src/**/*.js', 'gulpfile.babel.js', '!src/styles/css/main.min.css.js'])
+    .pipe(plugins.standard())
+    .pipe(plugins.standard.reporter('default', {breakOnError: true}))
+})
+
+gulp.task('stylus', () => {
   gulp.src('src/styles/styl/main.styl')
     .pipe(plugins.plumber()) // with the plumber the gulp task won't crash on errors
     .pipe(plugins.stylus({
@@ -40,12 +53,12 @@ gulp.task('stylus', function () {
     }))
     // https://github.com/ai/autoprefixer#browsers
     .pipe(plugins.autoprefixer(
-        'last 4 versions',
-        '> 1%',
-        'Explorer >= 11',
-        'Firefox ESR',
-        'iOS >= 9',
-        'android >= 4'
+      'last 4 versions',
+      '> 1%',
+      'Explorer >= 11',
+      'Firefox ESR',
+      'iOS >= 9',
+      'android >= 4'
     ))
     // always minify otherwise it gets broken with line-breaks
     // when surrounded with `'s when injected
@@ -59,18 +72,7 @@ gulp.task('stylus', function () {
     .pipe(plugins.connect.reload())
 })
 
-gulp.task('todo', function () {
-  gulp.src(
-    ['src/**/*.{js, styl}', 'gulpfile.js', 'examples/*.html'],
-    {base: './'}
-  )
-    .pipe(plugins.todo({
-      fileName: 'TODO.md'
-    }))
-    .pipe(gulp.dest('./'))
-})
-
-gulp.task('browserify', ['clean:js'], function (cb) {
+gulp.task('browserify', ['clean:js'], (cb) => {
   const entry = path.join(__dirname, '/src/index.js')
   const bundler = browserify({
     entries: [entry],
@@ -80,7 +82,11 @@ gulp.task('browserify', ['clean:js'], function (cb) {
   })
 
   pump([
-    bundler.require(entry, {expose: 'videomail-client'}).bundle(),
+    bundler
+      .require(entry, {expose: 'videomail-client'})
+      .transform('babelify', {presets: ['es2015'], sourceMaps: !options.minify})
+      .bundle(),
+
     source('./src/'), // gives streaming vinyl file object
     buffer(), // required because the next steps do not support streams
     plugins.concat('videomail-client.js'),
@@ -94,8 +100,8 @@ gulp.task('browserify', ['clean:js'], function (cb) {
   ], cb)
 })
 
-gulp.task('connect', ['build'], function () {
-  var SSL_CERTS_PATH = path.join(__dirname, '/etc/ssl-certs/')
+gulp.task('connect', ['build'], () => {
+  var SSL_CERTS_PATH = path.join(__dirname, '/env/dev/ssl-certs/')
 
   sslRootCas
     .inject()
@@ -110,14 +116,14 @@ gulp.task('connect', ['build'], function () {
       key: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.key.pem')),
       cert: fs.readFileSync(path.join(SSL_CERTS_PATH, 'server', 'my-server.crt.pem'))
     },
-    middleware: function () {
-      var router = new Router()
+    middleware: () => {
+      const router = new Router()
 
       router.use(bodyParser.json())
       router.use(send.json())
 
       // does not work, see bug https://github.com/AveVlad/gulp-connect/issues/170
-      router.post('/contact', function (req, res) {
+      router.post('/contact', (req, res) => {
         console.log('Videomail data received:', req.body)
 
         // At this stage, a backend could store the videomail_key in req.body
@@ -134,32 +140,23 @@ gulp.task('connect', ['build'], function () {
   })
 })
 
-gulp.task('reload', function () {
+gulp.task('reload', () => {
   plugins.connect.reload()
 })
 
-gulp.task('lint', function () {
-  return gulp.src(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'])
-    .pipe(plugins.standard())
-    .pipe(plugins.standard.reporter('default', {
-      breakOnError: true,
-      quiet: true
-    }))
-})
-
-gulp.task('watch', ['connect'], function () {
+gulp.task('watch', ['connect'], () => {
   gulp.watch(['src/styles/styl/**/*.styl'], ['stylus'])
   gulp.watch(['src/**/*.js'], ['browserify'])
   // commented out so that it reloads faster
-  // gulp.watch(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'], ['lint'])
+  // gulp.watch(['src/**/*.js', 'gulpfile.js', '!src/styles/css/main.min.css.js'], ['standard'])
   gulp.watch(['examples/*.html'], ['reload'])
 })
 
 // get inspired by
 // https://www.npmjs.com/package/gulp-tag-version and
 // https://github.com/nicksrandall/gulp-release-tasks/blob/master/tasks/release.js
-gulp.task('bumpVersion', function () {
-  var bumpOptions = {}
+gulp.task('bumpVersion', () => {
+  const bumpOptions = {}
 
   if (options.version) {
     bumpOptions.version = options.version
@@ -168,11 +165,11 @@ gulp.task('bumpVersion', function () {
   }
 
   return gulp.src(['./package.json'])
-        .pipe(plugins.bump(bumpOptions))
-        .pipe(plugins.if(options.write, gulp.dest('./')))
-        .on('error', plugins.util.log)
+    .pipe(plugins.bump(bumpOptions))
+    .pipe(plugins.if(options.write, gulp.dest('./')))
+    .on('error', plugins.util.log)
 })
 
 gulp.task('examples', ['connect', 'watch'])
-gulp.task('build', ['lint', 'stylus', 'browserify', 'todo'])
+gulp.task('build', ['standard', 'stylus', 'browserify', 'todo'])
 gulp.task('default', ['build'])

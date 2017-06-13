@@ -1,13 +1,13 @@
-var despot = require('despot')
+import despot from 'despot'
 
-var VideomailError = require('./videomailError')
-var Events = require('./../events')
+import VideomailError from './videomailError'
+import Events from './../events'
 
 // TODO: MAKE EVENT EMITTING IN DESPOT NOT GLOBAL BUT BY CONTAINER ID INSTEAD
 
-module.exports = function (options, name) {
+export default function (options, name) {
   this.emit = function (event) {
-    var args = Array.prototype.slice.call(arguments, 0)
+    const args = Array.prototype.slice.call(arguments, 0)
 
     if (!event) {
       throw VideomailError.create('You cannot emit without an event.', options)
@@ -40,9 +40,9 @@ module.exports = function (options, name) {
 
     var result = despot.emit.apply(despot, args)
 
-        // Todo: have this emitted through a configuration because it is pretty noisy
-        // if (event !== Events.EVENT_EMITTED)
-        //     this.emit(Events.EVENT_EMITTED, event)
+    // Todo: have this emitted through a configuration because it is pretty noisy
+    // if (event !== Events.EVENT_EMITTED)
+    //     this.emit(Events.EVENT_EMITTED, event)
 
     return result
   }
